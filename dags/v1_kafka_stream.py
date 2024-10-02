@@ -1,12 +1,6 @@
 import uuid
 from datetime import datetime
-from airflow import DAG
-from airflow.operators.python import PythonOperator
 
-default_args = {
-    'owner': 'tharhtet',
-    'start_date': datetime(2024, 10, 1, 10, 00)
-}
 
 def get_data():
     import requests
@@ -21,7 +15,7 @@ def get_data():
 def format_data(res):
     data = {}
     location = res['location']
-    data['id'] = uuid.uuid4()
+    data['id'] = str(uuid.uuid4())
     data['first_name'] = res['name']['first']
     data['last_name'] = res['name']['last']
     data['gender'] = res['gender']
@@ -36,3 +30,22 @@ def format_data(res):
     data['picture'] = res['picture']['medium']
 
     return data
+
+
+def stream_data():
+    import json
+    from kafka import KafkaProducer
+    import time
+    import logging
+
+    res = get_data()
+    res = format_data(res)
+    producer = KafkaProducer(bootstrap_servers=['localhost:9092'], max_block_ms=5000)
+    curr_time = time.time()
+
+    # send data to Kafka topic
+    print(res)
+    producer.send("user_created", json.dumps(res).encode('utf-8'))
+    
+
+stream_data()
