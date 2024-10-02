@@ -1,2 +1,8 @@
 apache-airflow
 apache-airflow-providers-http
+kafka-python
+SQLAlchemy
+apache-airflow
+apache-airflow-providers-apache-spark
+pyspark
+
